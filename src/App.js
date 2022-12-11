@@ -29,8 +29,6 @@ function App() {
     {}
   )
 
-  dispatch({ type: actions.add_digit, payload: { digit: 1 }})
-
   return (
     <div className="calculator-grid">
       <div className='output'>
