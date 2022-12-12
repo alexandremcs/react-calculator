@@ -14,10 +14,28 @@ export const actions = {
 function reducer(state, { type, payload }) {
   switch (type) {
     case actions.add_digit:
+
+      if (payload.digit === "0" && state.currentOperand === "0"){
+        return state
+      }
+
+      if (payload.digit === "." && state.currentOperand.includes(".")){
+        return state
+      }
+
       return {
         ...state,
         currentOperand: `${state.currentOperand || ""}${payload.digit}`,
       }
+
+    case actions.choose_operation:
+      if (state.currentOperand == null && state.previousOperand == null) {
+        return state
+      }
+
+    case actions.clear:
+      return {}
+    
     default:
       break;
   }
@@ -36,7 +54,7 @@ function App() {
         <div className='previous-operand'>{previousOperand} {operation}</div>
         <div className='current-operand'>{currentOperand}</div>
       </div>
-      <button className='ac-del-btn'>AC</button>
+      <button className='ac-del-btn' onClick={() => dispatch({ type: actions.clear })}>AC</button>
       <button className='ac-del-btn'>DEL</button>
       <button className='operand-btn'>%</button>
       <OperationBtn operation="/" dispatch={dispatch} />
