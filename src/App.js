@@ -14,7 +14,13 @@ export const actions = {
 function reducer(state, { type, payload }) {
   switch (type) {
     case actions.add_digit:
-
+      if (state.overwrite){
+        return {
+          ...state,
+          currentOperand: payload.digit,
+          overwrite: false
+        }
+      }
       if (payload.digit === "0" && state.currentOperand === "0"){
         return state
       }
@@ -58,7 +64,37 @@ function reducer(state, { type, payload }) {
 
     case actions.clear:
       return {}
-    
+    case actions.delete_digit:
+      if (state.overwrite) {
+        return {
+          ...state,
+          overwrite: false,
+          currentOperand: null
+        }
+      }
+      if (state.currentOperand == null) return state
+      if (state.currentOperand.length === 1) {
+        return { ...state, currentOperand: null }
+      }
+
+      return {
+        ...state,
+        currentOperand: state.currentOperand.slice(0, -1)
+      }
+    case actions.evaluate:
+      if (state.operation == null || 
+        state.currentOperand == null || 
+        state.previousOperand == null) {
+        return state
+      }
+
+      return {
+        ...state,
+        overwrite: true,
+        previousOperand: null,
+        operation: null,
+        currentOperand:evaluate(state)
+      }
     default:
       break;
   }
@@ -89,6 +125,17 @@ function evaluate ({ currentOperand, previousOperand, operation }) {
   return computation.toString()
 }
 
+const INTEGER_FORMATTER = new Intl.NumberFormat("pt-br", {
+  maximumFractionDigits: 0,
+})
+
+function formatOperand(operand) {
+  if (operand == null) return
+  const [integer, decimal] = operand.split('.')
+  if (decimal == null) return INTEGER_FORMATTER.format(integer)
+  return `${INTEGER_FORMATTER.format(integer)},${decimal}`
+}
+
 function App() {
   const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(
     reducer,
@@ -99,12 +146,11 @@ function App() {
     <div className="calculator-grid">
       <div className='output'>
         <div className='calculator-title'> React Calculator</div>
-        <div className='previous-operand'>{previousOperand} {operation}</div>
-        <div className='current-operand'>{currentOperand}</div>
+        <div className='previous-operand'>{formatOperand(previousOperand)} {operation}</div>
+        <div className='current-operand'>{formatOperand(currentOperand)}</div>
       </div>
-      <button className='ac-del-btn' onClick={() => dispatch({ type: actions.clear })}>AC</button>
-      <button className='ac-del-btn'>DEL</button>
-      <button className='operand-btn'>%</button>
+      <button className='span-two ac-del-btn' onClick={() => dispatch({ type: actions.clear })}>AC</button>
+      <button className='ac-del-btn' onClick={() => dispatch({ type: actions.delete_digit })}>DEL</button>
       <OperationBtn operation="÷" dispatch={dispatch} />
       <DigitBtn digit="7" dispatch={dispatch} />
       <DigitBtn digit="8" dispatch={dispatch} />
@@ -120,7 +166,7 @@ function App() {
       <OperationBtn operation="+" dispatch={dispatch} />
       <DigitBtn digit="." dispatch={dispatch} />
       <DigitBtn digit="0" dispatch={dispatch} />
-      <button className='span-two operand-btn'>=</button>
+      <button className='span-two operand-btn' onClick={() => dispatch({ type: actions.evaluate })}>=</button>
     </div>
   );
 }
