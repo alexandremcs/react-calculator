@@ -33,12 +33,60 @@ function reducer(state, { type, payload }) {
         return state
       }
 
+      if (state.currentOperand == null) {
+        return {
+          ...state,
+          operation: payload.operation
+        }
+      }
+
+      if (state.previousOperand == null) {
+        return {
+          ...state,
+          operation: payload.operation,
+          previousOperand: state.currentOperand,
+          currentOperand: null
+        }
+      }
+
+      return {
+        ...state,
+        previousOperand: evaluate(state),
+        operation: payload.operation,
+        currentOperand: null
+      }
+
     case actions.clear:
       return {}
     
     default:
       break;
   }
+}
+
+function evaluate ({ currentOperand, previousOperand, operation }) {
+  const prev = parseFloat(previousOperand)
+  const current = parseFloat(currentOperand)
+  if (isNaN(prev) || isNaN(current)) return ""
+  let computation = ""
+  switch (operation) {
+    case "+":
+      computation = prev + current
+      break;
+    case "-":
+      computation = prev - current
+      break;
+    case "x":
+      computation = prev * current
+      break;
+    case "÷":
+      computation = prev / current
+      break;
+    default:
+      break;
+  }
+
+  return computation.toString()
 }
 
 function App() {
@@ -57,11 +105,11 @@ function App() {
       <button className='ac-del-btn' onClick={() => dispatch({ type: actions.clear })}>AC</button>
       <button className='ac-del-btn'>DEL</button>
       <button className='operand-btn'>%</button>
-      <OperationBtn operation="/" dispatch={dispatch} />
+      <OperationBtn operation="÷" dispatch={dispatch} />
       <DigitBtn digit="7" dispatch={dispatch} />
       <DigitBtn digit="8" dispatch={dispatch} />
       <DigitBtn digit="9" dispatch={dispatch} />
-      <OperationBtn operation="X" dispatch={dispatch} />
+      <OperationBtn operation="x" dispatch={dispatch} />
       <DigitBtn digit="4" dispatch={dispatch} />
       <DigitBtn digit="5" dispatch={dispatch} />
       <DigitBtn digit="6" dispatch={dispatch} />
