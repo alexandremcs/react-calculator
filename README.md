@@ -10,6 +10,10 @@
 
 <br>
 
+## Demo do projeto
+
+- [Acesse a demo](https://639a136fd65beb2bbc10ee71--soft-cranachan-922c7f.netlify.app/)
+
 ## Descrição do Projeto 
 
 Primeiro projeto utilizando a biblioteca React. Uma calculadora com as operações aritméticas.
